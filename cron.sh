@@ -54,6 +54,7 @@ run_r() {
     -e HOME=/root \
     -e RENV_CONFIG_AUTOLOADER_ENABLED=FALSE \
     -e NBA_DB_SOURCE="${NBA_DB_SOURCE:-cockroach-read}" \
+    -e NBA_DRAFT_SEASON="${NBA_DRAFT_SEASON:-}" \
     -v "$REPO_DIR:/work" \
     -v "$CREDS_FILE:/root/.config/scs_hub_credentials.ini:ro" \
     -w /work \

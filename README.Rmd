@@ -35,6 +35,13 @@ You can launch the application by running:
 draft::run_app()
 ```
 
+## Season
+
+The draft's target season comes from `NBA_DRAFT_SEASON` (default `"2026-27"`),
+independent of the league dashboard's `NBA_SEASON`; the stats season is the
+season before it. Set the variable in the environment (or the draft's
+`.deploy.env`) to roll the season without editing code.
+
 ## About
 
 You are reading the doc about version : `r golem::pkg_version()`
