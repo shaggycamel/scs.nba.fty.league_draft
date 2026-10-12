@@ -129,7 +129,7 @@ mod_draft_server <- function(id, carry_thru, db_con) {
           glue_sql(
             "SELECT player_name 
             FROM util.draft_player_log 
-            WHERE (base_avoid IS TRUE OR league_id = {carry_thru()$selected$league_id})",
+            WHERE (league_id = {carry_thru()$selected$league_id} OR league_id IS NULL)",
             .con = db_con
           )
         )
@@ -200,8 +200,8 @@ mod_draft_server <- function(id, carry_thru, db_con) {
         nm <- setdiff(player_draft_stream()$player_name, input$draft_player_log)
 
         # Scope to the current league: the same player_name can be logged by
-        # several leagues, and the global base_avoid rows carry no league_id,
-        # so an unscoped delete would clear other leagues' picks as well.
+        # several leagues, and the global rows (league_id IS NULL) carry no
+        # league_id, so an unscoped delete would clear other leagues' picks as well.
         db_delete_record(
           db_con,
           glue_sql(
