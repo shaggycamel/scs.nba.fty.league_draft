@@ -1,3 +1,14 @@
+#' Categories the app renders that the per-league fty.categories_vw does not
+#' carry. They used to arrive as global `league_id IS NULL` rows; when the view
+#' moved per-league those rows disappeared, so min/turnover rate are supplied
+#' here to keep them selectable. display_order matches the old global rows.
+nba_only_cats <- data.frame(
+  nba_category = c("min", "tov_rt"),
+  fmt_category = c("Minutes", "Turnover Rate"),
+  display_order = c(2, 16),
+  stringsAsFactors = FALSE
+)
+
 #' helpers
 #'
 #' @description A utils function
@@ -7,9 +18,16 @@
 #' @noRd
 #' @importFrom dplyr filter bind_rows arrange distinct select
 cat_specs <- function(selected_league_id, vec = FALSE, h2h = TRUE, incl_nba_cat = NULL, excl_nba_cat = NULL) {
-  df_fty_cats <- filter(df_fty_cats, league_id == selected_league_id)
-  obj <- if (h2h) filter(df_fty_cats, category_role == "scored") else obj
-  obj <- if (!is.null(incl_nba_cat)) bind_rows(obj, filter(df_fty_cats, nba_category %in% incl_nba_cat)) else obj
+  league_cats <- filter(df_fty_cats, league_id == selected_league_id)
+  obj <- if (h2h) filter(league_cats, category_role == "scored") else league_cats
+  if (!is.null(incl_nba_cat)) {
+    extra <- filter(league_cats, nba_category %in% incl_nba_cat)
+    absent <- setdiff(incl_nba_cat, extra$nba_category)
+    if (length(absent) > 0) {
+      extra <- bind_rows(extra, filter(nba_only_cats, nba_category %in% absent))
+    }
+    obj <- bind_rows(obj, extra)
+  }
   obj <- if (!is.null(excl_nba_cat)) filter(obj, !nba_category %in% excl_nba_cat) else obj
   obj <- arrange(distinct(obj), display_order)
   obj <- as.list(tibble::deframe(select(obj, fmt_category, nba_category)))
